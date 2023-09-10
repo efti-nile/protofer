@@ -7,22 +7,68 @@ import cv2
 import numpy as np
 # import skvideo.io
 
-MAX_PARTS = 100
-PART_DURATION = dt.timedelta(minutes=5)
-FOURCC = cv2.VideoWriter_fourcc(*'mp4v')
+MAX_PARTS = 2
+PART_DURATION = dt.timedelta(seconds=30)
+FOURCC = cv2.VideoWriter_fourcc(*'h264')
 FPS = 20
 
 
-def record_av(uri, label):
-    fh = av.open(uri)
-    print(fh.format)
-    print(fh.streams)
-    print(fh.streams[0].format)
+class VideoWriter():
+
+    def __init__(self, dstfile, fps, options={}):
+        fps = int(round(fps))
+        self.container = av.open(dstfile, mode="w")
+        self.stream = self.container.add_stream("h264", rate=fps)
+        self.stream.options = options
+        self.init = False
+
+    def write(self, frame):
+        W, H = frame.shape[:2][::-1]
+        if not self.init:
+            self.stream.width = W
+            self.stream.height = H
+            self.init = True
+
+        if self.stream.width != W or self.stream.height != H:
+            raise Exception(f"Invalid frame shape: {(W,H)}, required: "
+                            f"{(self.stream.width, self.stream.height)}")
+
+        frame = av.VideoFrame.from_ndarray(frame, format="bgr24")
+        packet = self.stream.encode(frame)
+        self.container.mux(packet)
+
+    def close(self):
+        self.container.close()
 
 
-# def play_skv(uri):
-#     videodata = skvideo.io.vread("video_file_name")  
-#     print(videodata.shape)
+def record_av(uri, label, out):
+    cap = cv2.VideoCapture(uri)
+    writer = None
+    begin = None
+    parts = 0
+    while True:
+        ok, frame = cap.read()
+        if not ok:
+            cap.release()
+            if writer:
+                writer.close()
+            raise Exception(f'no frame returned: {uri}')
+        if not writer:
+            h, w, _ = frame.shape
+            begin = dt.datetime.now()
+            video = f'{label}_{begin.strftime("%Y-%m-%dT%H-%M-%S")}.mp4'
+            video_path = os.path.join(out, video)
+            writer = VideoWriter(video_path, FPS, options={'codec': 'h264',
+                                                           'bitrate': '3000k'})
+        writer.write(frame)
+        if dt.datetime.now() - begin > PART_DURATION:
+            if writer:
+                writer.close()
+                writer = None
+                parts += 1
+        if parts > MAX_PARTS:
+            cap.release()
+            quit()
 
 
 def play_av(uri):
@@ -57,6 +103,7 @@ def record_ocv(uri, label, out):
             video = f'{label}_{begin.strftime("%Y-%m-%dT%H-%M-%S")}.mp4'
             video_path = os.path.join(out, video)
             writer = cv2.VideoWriter(video_path, FOURCC, FPS, (w, h))
+        writer.write(frame)
         if dt.datetime.now() - begin > PART_DURATION:
             if writer:
                 writer.release()
@@ -68,4 +115,4 @@ def record_ocv(uri, label, out):
 
 
 if __name__ == '__main__':
-    record_ocv(sys.argv[1], 'cam', 'data')
+    record_av(sys.argv[1], 'cam', 'data')
