@@ -24,7 +24,8 @@ from tensorflow.keras.layers import DepthwiseConv2D, Add, Reshape, Dense, Multip
 from tensorflow.keras.regularizers import l2
 
 import sys
-sys.path.append('../')
+if '../' not in sys.path:
+    sys.path.append('../')
 from models_c import Composable
 
 class MobileNetV3(Composable):
