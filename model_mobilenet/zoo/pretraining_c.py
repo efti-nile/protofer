@@ -167,7 +167,7 @@ class Pretraining(object):
                 self.w_lr /= 10
         return epoch * self.w_lr / self.w_epochs
 
-    def warmup(self, x_train=None, y_train=None, epochs=5, batch_size=32, s_learning_rate=1e-6, e_learning_rate=0.001, 
+    def warmup(self, x_train=None, y_train=None, epochs=5, batch_size=32, s_lr=1e-6, e_learning_rate=0.001, 
                loss='categorical_crossentropy', metrics=['acc'], save=None):
         """ Warmup for numerical stability
             x_train   : training images
