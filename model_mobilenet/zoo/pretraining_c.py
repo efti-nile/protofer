@@ -49,7 +49,7 @@ class Pretraining(object):
     w_lr           = 0    # target warmup rate
     w_epochs       = 0    # number of epochs in warmup
 
-    def init_draw(self, x_train=None, y_train=None, ndraws=5, epochs=3, steps=350, lr=1e-06, 
+    def init_draw(self, x_train=None, y_train=None, ndraws=5, epochs=3, steps=350, learning_rate=1e-06, 
                   batch_size=32, metric='loss', early=False, save=None):
         """ Use the lottery ticket principle to find the best weight initialization
             x_train : training images
@@ -167,7 +167,7 @@ class Pretraining(object):
                 self.w_lr /= 10
         return epoch * self.w_lr / self.w_epochs
 
-    def warmup(self, x_train=None, y_train=None, epochs=5, batch_size=32, s_lr=1e-6, e_lr=0.001, 
+    def warmup(self, x_train=None, y_train=None, epochs=5, batch_size=32, s_learning_rate=1e-6, e_learning_rate=0.001, 
                loss='categorical_crossentropy', metrics=['acc'], save=None):
         """ Warmup for numerical stability
             x_train   : training images
@@ -213,7 +213,7 @@ class Pretraining(object):
                 data = {'s_lr': s_lr, 'e_lr': e_lr, 'epochs': epochs }
                 json.dump(data, f)
 
-    def pretext(self, x_train= None, zigsaw=9, epochs=10, batch_size=32, lr=0.001, 
+    def pretext(self, x_train= None, zigsaw=9, epochs=10, batch_size=32, learning_rate=0.001, 
                 loss='mse', metrics=['mse'], save=None):
         """ Pretrain using unsupervised pre-text task for zigsaw puzzle to learn essential features
             x_train   : training images
@@ -260,7 +260,7 @@ class Pretraining(object):
 
         # Construct wrapper model with the new top layer
         wrapper = Model(self.model.inputs, outputs)
-        wrapper.compile(loss=loss, optimizer=Adam(lr=lr), metrics=metrics)
+        wrapper.compile(loss=loss, optimizer=Adam(learning_rate=lr), metrics=metrics)
 
         # Rows/Columns
         R = x_train.shape[1]

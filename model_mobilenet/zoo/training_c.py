@@ -45,7 +45,7 @@ class Training(object):
     # Training
     ###
 
-    def compile(self, loss='categorical_crossentropy', optimizer=Adam(lr=0.001, decay=1e-5), metrics=['acc']):
+    def compile(self, loss='categorical_crossentropy', optimizer=Adam(learning_rate=0.001, decay=1e-5), metrics=['acc']):
         """ Compile the model for training
             loss     : the loss function
             optimizer: the optimizer
@@ -119,7 +119,7 @@ class Training(object):
             lr = self.cosine_decay(epoch, lr)
         return lr
 
-    def training(self, x_train=None, y_train=None, epochs=10, batch_size=32, lr=0.001, decay=(None, 0),
+    def training(self, x_train=None, y_train=None, epochs=10, batch_size=32, learning_rate=0.001, decay=(None, 0),
                  split=0.1, loss='categorical_crossentropy', metrics=['acc'], save=None):
         """ Full Training of the Model
             x_train    : training images
@@ -197,7 +197,7 @@ class Training(object):
         self.e_decay = decay
         self.e_steps = x_train.shape[0] // batch_size
         self.t_steps = self.e_steps * epochs
-        self.compile(optimizer=Adam(lr=lr, decay=decay[1]), loss=loss, metrics=metrics)
+        self.compile(optimizer=Adam(learning_rate=lr, decay=decay[1]), loss=loss, metrics=metrics)
 
         lrate = LearningRateScheduler(self.training_scheduler, verbose=1)
         result = self.model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, validation_split=split, 
