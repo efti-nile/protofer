@@ -19,7 +19,7 @@ from tensorflow.keras.layers import ReLU, Dense, Conv2D, Conv2DTranspose
 from tensorflow.keras.layers import DepthwiseConv2D, SeparableConv2D, Dropout
 from tensorflow.keras.layers import GlobalAveragePooling2D, Activation, BatchNormalization
 from tensorflow.keras.regularizers import l2
-from tensorflow.keras.optimizers import Adam, SGD
+from tensorflow.keras.optimizers.legacy import Adam, SGD
 from tensorflow.compat.v1.keras.initializers import glorot_uniform, he_normal
 from tensorflow.keras.callbacks import LearningRateScheduler
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
