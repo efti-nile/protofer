@@ -119,7 +119,7 @@ class Training(object):
             lr = self.cosine_decay(epoch, lr)
         return lr
 
-    def training(self, x_train=None, y_train=None, epochs=10, batch_size=32, learning_rate=0.001, decay=(None, 0),
+    def training(self, x_train=None, y_train=None, epochs=10, batch_size=32, lr=0.001, decay=(None, 0),
                  split=0.1, loss='categorical_crossentropy', metrics=['acc'], save=None):
         """ Full Training of the Model
             x_train    : training images

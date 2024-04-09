@@ -94,7 +94,7 @@ class Dataset(object):
         lr, batch_size = self.random_search(x_train, y_train, x_test, y_test)
 
         self.training(x_train, y_train, epochs=epochs, batch_size=batch_size,
-                      learning_rate=lr, decay=decay)
+                      lr=lr, decay=decay)
         self.evaluate(x_test, y_test)
 
     def cifar100(self, epochs=20, decay=('cosine', 0)):
@@ -114,7 +114,7 @@ class Dataset(object):
         lr, batch_size = self.grid_search(x_train, y_train, x_test, y_test)
 
         self.training(x_train, y_train, epochs=epochs, batch_size=batch_size,
-                      learning_rate=lr, decay=decay)
+                      lr=lr, decay=decay)
         self.evaluate(x_test, y_test)
 
     def coil100(self, epochs=20, decay=('cosine', 0)):
@@ -145,6 +145,6 @@ class Dataset(object):
         lr, batch_size = self.grid_search(x_train, y_train, x_test, y_test)
 
         self.training(x_train, y_train, epochs=epochs, batch_size=batch_size,
-                      learning_rate=lr, decay=decay)
+                      lr=lr, decay=decay)
         self.evaluate(x_test, y_test)
 
