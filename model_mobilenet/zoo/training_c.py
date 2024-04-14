@@ -30,6 +30,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 import random
+import types
 import math
 import sys, os, json
 
@@ -195,7 +196,12 @@ class Training(object):
 
         self.i_lr    = lr
         self.e_decay = decay
-        self.e_steps = x_train.shape[0] // batch_size
+        if isinstance(x_train, np.array):
+            self.e_steps = x_train.shape[0] // batch_size
+        elif isinstance(x_train, types.GeneratorType):
+            self.e_steps = len(x_train) // batch_size
+        else: 
+            raise TypeError
         self.t_steps = self.e_steps * epochs
         self.compile(optimizer=Adam(learning_rate=lr, decay=decay[1]), loss=loss, metrics=metrics)
 
