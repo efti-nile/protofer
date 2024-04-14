@@ -120,7 +120,7 @@ class Training(object):
         return lr
 
     def training(self, x_train=None, y_train=None, epochs=10, batch_size=32, lr=0.001, decay=(None, 0),
-                 split=0.1, loss='categorical_crossentropy', metrics=['acc'], save=None):
+                 split=0.1, loss='categorical_crossentropy', metrics=['acc'], save=None, validation_data=None):
         """ Full Training of the Model
             x_train    : training images
             y_train    : training labels
@@ -203,8 +203,13 @@ class Training(object):
         self.compile(optimizer=Adam(learning_rate=lr, decay=decay[1]), loss=loss, metrics=metrics)
 
         lrate = LearningRateScheduler(self.training_scheduler, verbose=1)
-        result = self.model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, validation_split=split, 
-                       verbose=1, callbacks=[lrate])
+
+        if validation_data is not None:
+            result = self.model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=validation_data, 
+                        verbose=1, callbacks=[lrate])
+        else:
+            result = self.model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, validation_split=split, 
+                        verbose=1, callbacks=[lrate])
 
         if save is not None:
             self.model.save_weights(save + '/train/chkpt')
