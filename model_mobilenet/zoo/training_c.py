@@ -196,7 +196,7 @@ class Training(object):
 
         self.i_lr    = lr
         self.e_decay = decay
-        if isinstance(x_train, np.array):
+        if isinstance(x_train, np.ndarray):
             self.e_steps = x_train.shape[0] // batch_size
         elif isinstance(x_train, types.GeneratorType):
             self.e_steps = len(x_train) // batch_size
