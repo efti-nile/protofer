@@ -1,4 +1,4 @@
-/recorder/data
-/model_mobilenet/fer2013
+data
+model
 venv
 __pycache__
