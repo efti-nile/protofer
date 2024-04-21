@@ -1,5 +1,8 @@
+import tensorflow as tf
 from tensorflow.keras.utils import image_dataset_from_directory
 
+
+AUTOTUNE = tf.data.AUTOTUNE
 
 def get_dataset(
     ds_dir,
@@ -11,12 +14,20 @@ def get_dataset(
 ):
 
     """
-    Returns a tuple of tf.data.Dataset objects for the training and validation sets.
-    For the training set, the data is augmented.
+    Returns a dataset object created from an image folder.
+    
     Args:
-        augment (bool): Whether to apply data augmentation.
+        ds_dir: A path to images. The path has to contain N folders with images,
+            folders named as class names.
+        batch_size (int): Split pairs into batches of this size.
+        augment (tf.keras.Sequential): Augmentations to be aplied. Should be
+            specified as a sequential keras model which contains all necessary
+            transformations as layers.
+        color_mode:
+        shuffle_buffer_size: Buffer size for shuffle.
+        seed:
     Returns:
-        A tuple of tf.data.Dataset objects.
+        A tf.data.Dataset objects.
     """
 
     ds = image_dataset_from_directory(
@@ -27,7 +38,7 @@ def get_dataset(
         color_mode=color_mode
     )
 
-    class_names = train_ds.class_names
+    class_names = ds.class_names
     print("Class Names:", class_names)
 
     def one_hot_encode(labels):
@@ -45,8 +56,6 @@ def get_dataset(
         return normalized_ds
 
     ds = normalize(ds)
-
-    AUTOTUNE = tf.data.AUTOTUNE
 
     def configure_for_performance(ds):
         ds = ds.cache()
