@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras.utils import image_dataset_from_directory
 
@@ -67,3 +68,17 @@ def get_dataset(
 
     return ds
 
+
+def visualize(ds):
+    plt.figure(figsize=(10, 10))
+    for images, labels in ds.take(1):
+        for i in range(9):
+            ax = plt.subplot(3, 3, i + 1)
+            plt.imshow(images[i].numpy().astype("uint8"))
+            plt.axis("off")
+
+
+def print_shapes(ds):
+    for images, labels in ds.take(1):
+        print(images.shape)
+        print(labels.shape)
