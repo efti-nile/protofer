@@ -7,7 +7,9 @@ AUTOTUNE = tf.data.AUTOTUNE
 
 def get_dataset(
     ds_dir,
-    batch_size=64,
+    img_width,
+    img_height,
+    batch_size,
     augment=None,
     color_mode='grayscale',
     shuffle_buffer_size=5000,
@@ -20,6 +22,8 @@ def get_dataset(
     Args:
         ds_dir: A path to images. The path has to contain N folders with images,
             folders named as class names.
+        img_width:
+        img_height:
         batch_size (int): Split pairs into batches of this size.
         augment (tf.keras.Sequential): Augmentations to be aplied. Should be
             specified as a sequential keras model which contains all necessary
@@ -34,7 +38,7 @@ def get_dataset(
     ds = image_dataset_from_directory(
         ds_dir,
         seed=seed,
-        image_size=(img_size, img_size),
+        image_size=(img_height, img_width),
         batch_size=batch_size,
         color_mode=color_mode
     )
@@ -49,7 +53,7 @@ def get_dataset(
     ds = ds.map(lambda image, label: (image, one_hot_encode(label)))
 
     if augment:
-        ds = ds.map(lambda image, label: (data_augmentation(image), label))
+        ds = ds.map(lambda image, label: (augment(image), label))
 
     def normalize(ds):
         normalization_layer = tf.keras.layers.Rescaling(1./255)
