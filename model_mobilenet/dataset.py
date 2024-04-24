@@ -1,5 +1,8 @@
+import os
+
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import numpy as np
 from tensorflow.keras.utils import image_dataset_from_directory
 
 
@@ -71,6 +74,42 @@ def get_dataset(
     ds = configure_for_performance(ds)
 
     return ds
+
+
+def save_images(ds, classes, save_dir) -> None:
+    """
+    Save images from a dataset to a directory.
+    Args:
+        ds (tf.data.Dataset): Dataset
+        classes (list[str]): List of class names
+        save_dir: Directory to save images
+    """
+    for i, batch in enumerate(ds):
+        images, targets = batch
+        for j, image in enumerate(images):
+            class_name = classes[np.argmax(targets[j])]
+            image_path = os.path.join(save_dir, f"{i:03}_{j:03}_{class_name}.png")
+            tf.keras.preprocessing.image.save_img(image_path, image)
+
+
+def print_counts(ds, classes) -> None:
+    """
+    Print the number of images for each class.
+    Args:
+        ds (tf.data.Dataset): Dataset
+        classes (list[str]): List of class names
+    """
+    counts = {c: 0 for c in classes}
+    total = 0
+    for batch in ds:
+        _, targets = batch
+        for t in targets:
+            class_name = classes[np.argmax(t)]
+            counts[class_name] += 1
+            total += 1
+    for c in classes:
+        print(f"{c}: {counts[c]}")
+    print(f"Total: {total}")
 
 
 def visualize(ds):
