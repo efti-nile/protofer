@@ -2,12 +2,17 @@ import matplotlib.pyplot as plt
 
 
 def plot_metrics(history):
+
     """
     This function takes the history from the model.fit() function and plots
     the training and validation loss and accuracy.
 
     Args:
-    history: A dictionary containing the training and validation metrics.
+        history (dict): A dictionary like:
+            {'loss': values, 'acc': values,
+             'val_loss': values, 'val_acc': values}
+            Where values is a list of metric values or None. All lists
+            must have same length.
     """
 
     # Create a figure with two subplots.
