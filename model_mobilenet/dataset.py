@@ -51,6 +51,9 @@ def get_dataset(
         color_mode=color_mode
     )
 
+    class_names = ds.class_names
+    print("Class Names:", class_names)
+    
     if convert_to_rgb:
         
         def convert(image, label):
@@ -58,9 +61,6 @@ def get_dataset(
             return image, label
         
         ds = ds.map(convert)
-
-    class_names = ds.class_names
-    print("Class Names:", class_names)
 
     def one_hot_encode(labels):
         num_classes = len(class_names)
