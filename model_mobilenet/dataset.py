@@ -57,7 +57,7 @@ def get_dataset(
     if convert_to_rgb:
         
         def convert(image, label):
-            imgae = tf.image.grayscale_to_rgb(image)
+            image = tf.image.grayscale_to_rgb(image)
             return image, label
         
         ds = ds.map(convert)
