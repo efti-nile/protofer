@@ -15,6 +15,7 @@ def get_dataset(
     batch_size,
     augment=None,
     color_mode='grayscale',
+    convert_to_rgb=False,
     shuffle_buffer_size=5000,
     seed=123
 ):
@@ -32,11 +33,15 @@ def get_dataset(
             specified as a sequential keras model which contains all necessary
             transformations as layers.
         color_mode:
+        convert_to_rgb: convert read grayscale images to RGB
         shuffle_buffer_size: Buffer size for shuffle.
         seed:
     Returns:
         A tf.data.Dataset objects.
     """
+    
+    if convert_to_rgb and color_mode != 'grayscale':
+        ValueError("convert_to_rgb flag is only for grayscale mode")
 
     ds = image_dataset_from_directory(
         ds_dir,
@@ -45,6 +50,14 @@ def get_dataset(
         batch_size=batch_size,
         color_mode=color_mode
     )
+
+    if convert_to_rgb:
+        
+        def convert(image, label):
+            imgae = tf.image.grayscale_to_rgb(image)
+            return image, label
+        
+        ds = ds.map(convert)
 
     class_names = ds.class_names
     print("Class Names:", class_names)
