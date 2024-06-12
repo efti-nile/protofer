@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continuously Updated Image</title>
+</head>
+<body>
+    <div id="image-container"></div>
+
+    <script>
+        const imageContainer = document.getElementById('image-container');
+        const wsUri = "ws://localhost:8765"; // Replace with your server's WebSocket address
+
+        let websocket;
+
+        function initWebSocket() {
+            websocket = new WebSocket(wsUri);
+            websocket.onopen = onOpen;
+            websocket.onmessage = onMessage;
+            websocket.onerror = onError;
+        }
+
+        function onOpen(event) {
+            console.log("WebSocket connection opened");
+        }
+
+        function onMessage(event) {
+            const imageUrl = `data:image/jpeg;base64,${event.data}`;
+            imageContainer.innerHTML = `<img src="${imageUrl}" alt="Updated Image">`;
+			console.log("got an image")
+        }
+
+        function onError(event) {
+            console.error("WebSocket error:", event);
+        }
+
+        window.onload = initWebSocket;
+    </script>
+</body>
+</html>
