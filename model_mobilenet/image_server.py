@@ -19,7 +19,7 @@ def predict(model, image):
         image = tf.cast(image, tf.float32) / 255.0
         batch = tf.expand_dims(image, axis=0)
         scores = model(batch)
-        class_id = tf.math.argmax(tf.reshape(scores, [-1]))
+        class_id = tf.math.argmax(scores)
         class_name = classes[class_id]
         return class_name
     except Exception as e:
@@ -47,13 +47,19 @@ async def producer(queue: asyncio.Queue, frames_to_skip=20):
         raise
 
 
-async def processor(queue: asyncio.Queue):
+async def processor(queue_in: asyncio.Queue,
+                    queue_out: asyncio.Queue):
     try:
         model = get_model()
         while True:
             frame = await queue.get()
             prediction = await asyncio.to_thread(predict, model, frame)
-            print(f'Processed frame shape: {frame.shape}, Prediction: {prediction}')
+            # TODO 1. add image encoding 2. fix glagnu
+            await queue_out.put({
+                'frame': frame.copy(),
+                'prediction': prediction
+            })
+            print('frame processed')
     except Exception as e:
         print(f"Exception in processor: {e}")
         raise
