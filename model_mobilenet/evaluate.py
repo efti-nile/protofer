@@ -9,7 +9,7 @@ def predict_dataset(model, ds):
     _, labels_batched = tuple(zip(*ds))
     labels = tf.concat(labels_batched, axis=0)
 
-    predictions_batched = model.predict(val_ds)
+    predictions_batched = model.predict(ds)
     predictions = tf.concat(predictions_batched, axis=0)
 
     labels = tf.argmax(labels, axis=1)
