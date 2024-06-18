@@ -4,7 +4,19 @@ import tensorflow as tf
 from sklearn.metrics import confusion_matrix
 
 
-def predict_dataset(model, ds):
+def predict_dataset(model, ds) -> (tf.Tensor, tf.Tensor):
+    
+    """
+    Predicts on the whole dataset.
+    
+    Args:
+        model:
+        ds:
+        
+    Returns:
+        labels: 1D tensor of class ids as integers, ground truth.
+        predictions: 1D tensor of class ids as integers, predicted.
+    """
 
     _, labels_batched = tuple(zip(*ds))
     labels = tf.concat(labels_batched, axis=0)
@@ -18,7 +30,15 @@ def predict_dataset(model, ds):
     return labels, predictions
 
 
-def plot_confusion_matrix(labels, predictions):
+def plot_confusion_matrix(labels, predictions) -> None:
+    
+    """
+    Plots a confusion matrix using matplotlib.pyplot
+    
+    Args:
+        labels: 1D tensor of ground truth class ids
+        predictions: 1D tensor of predicted class ids
+    """
 
     cm = confusion_matrix(labels, predictions)
 
