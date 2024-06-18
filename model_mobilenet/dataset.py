@@ -34,7 +34,7 @@ def get_dataset(
             transformations as layers.
         color_mode:
         convert_to_rgb: convert read grayscale images to RGB
-        shuffle_buffer_size: Buffer size for shuffle.
+        shuffle_buffer_size: Buffer size for shuffle. If `None` not to shuffle.
         seed:
     Returns:
         A tf.data.Dataset objects.
@@ -80,7 +80,8 @@ def get_dataset(
 
     def configure_for_performance(ds):
         ds = ds.cache()
-        ds = ds.shuffle(buffer_size=shuffle_buffer_size)
+        if shuffle_buffer_size is not None:
+            ds = ds.shuffle(buffer_size=shuffle_buffer_size)
         ds = ds.prefetch(buffer_size=AUTOTUNE)
         return ds
 
