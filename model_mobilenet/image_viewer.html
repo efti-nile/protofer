@@ -7,10 +7,14 @@
 </head>
 <body>
     <div id="image-container"></div>
+    <div id="prediction-container"></div>
+    <div id="scores-container"></div>
 
     <script>
         const imageContainer = document.getElementById('image-container');
-        const wsUri = "ws://localhost:8765"; // Replace with your server's WebSocket address
+        const predictionContainer = document.getElementById('prediction-container')
+        const scoresContainer = document.getElementById('scores-container')
+        const wsUri = "ws://localhost:8765";  // Replace with your server's WebSocket address
 
         let websocket;
 
@@ -26,9 +30,18 @@
         }
 
         function onMessage(event) {
-            const imageUrl = `data:image/jpeg;base64,${event.data}`;
-            imageContainer.innerHTML = `<img src="${imageUrl}" alt="Updated Image">`;
-			console.log("got an image")
+            try {
+                const data = JSON.parse(event.data);
+                const base64Image = data.frame;
+                const prediction = data.prediction;
+                const scores = data.scores
+                const imgUrl = `data:image/jpeg;base64,${base64Image}`;
+                imageContainer.innerHTML = `<img src="${imgUrl}">`;
+                predictionContainer.innerText = `Prediction: ${prediction}`;
+                scoresContainer.innerText = `Scores: ${scores}`;
+            } catch (error) {
+                console.error("Failed to parse JSON data:", error);
+            }
         }
 
         function onError(event) {

@@ -1,7 +1,9 @@
 import asyncio
 import base64
-import cv2
+import json
 import random
+
+import cv2
 import tensorflow as tf
 import websockets
 
@@ -13,15 +15,16 @@ roi = [150, 150, 400, 400]
 
 def predict(model, image):
     try:
-        image = image[150:400, 150:400, :]
+        image = image[roi[1]:roi[3], roi[0]:roi[2], :]
         image = tf.image.resize(image, [48, 48])
         image = tf.image.rgb_to_grayscale(image)
         image = tf.cast(image, tf.float32) / 255.0
         batch = tf.expand_dims(image, axis=0)
-        scores = model(batch)
+        scores = tf.reshape(model(batch), [-1])
         class_id = tf.math.argmax(scores)
         class_name = classes[class_id]
-        return class_name
+        scores_text = ' ,'.join(f'{s:.2f}' for s in scores)
+        return class_name, scores_text
     except Exception as e:
         print(f"Exception in predict: {e}")
         raise
@@ -52,12 +55,14 @@ async def processor(queue_in: asyncio.Queue,
     try:
         model = get_model()
         while True:
-            frame = await queue.get()
-            prediction = await asyncio.to_thread(predict, model, frame)
-            # TODO 1. add image encoding 2. fix glagnu
+            frame = await queue_in.get()
+            prediction, scores = await asyncio.to_thread(predict, model, frame)
             await queue_out.put({
-                'frame': frame.copy(),
-                'prediction': prediction
+                'frame': frame[roi[1]:roi[3],
+                               roi[0]:roi[2],
+                               :].copy(),
+                'prediction': prediction,
+                'scores': scores
             })
             print('frame processed')
     except Exception as e:
@@ -71,7 +76,16 @@ async def handler(queue, websocket, path):
             item = await queue.get()
             if item is None:
                 break
-            await websocket.send(item)
+            frame = item['frame']
+            ret, jpeg_frame = cv2.imencode('.jpg', frame)
+            if not ret:
+                raise RuntimeError("error in the image encoding")
+            base64_frame = base64.b64encode(jpeg_frame.tobytes()).decode('utf-8')
+            await websocket.send(json.dumps({
+                'frame': base64_frame,
+                'prediction': item['prediction'],
+                'scores': item['scores']
+            }))
             print("Sent item through WebSocket")
     except Exception as e:
         print(f"Exception in handler: {e}")
@@ -79,14 +93,15 @@ async def handler(queue, websocket, path):
 
 
 async def main():
-    queue = asyncio.Queue()
-    producer_task = asyncio.create_task(producer(queue))
-    processor_task = asyncio.create_task(processor(queue))
-    await asyncio.gather(producer_task, processor_task)
+    queue_in = asyncio.Queue()
+    queue_out = asyncio.Queue()  # TODO: limit this queue
+    producer_task = asyncio.create_task(producer(queue_in))
+    processor_task = asyncio.create_task(processor(queue_in, queue_out))
+    # await asyncio.gather(producer_task, processor_task)
     # Uncomment the following lines to run the WebSocket server
-    # server = await websockets.serve(lambda ws, path: handler(queue, ws, path), "localhost", 8765)
+    server = await websockets.serve(lambda ws, path: handler(queue_out, ws, path), "localhost", 8765)
     # print("WebSocket server started on port 8765")
-    # await asyncio.Future()
+    await asyncio.Future()
 
 
 # Run the main function
